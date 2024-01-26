@@ -9,15 +9,20 @@
         {
             string input = File.ReadAllText(isTest ? testPath : inputPath);
             var lines = input.Replace("\r", string.Empty).Split("\n", StringSplitOptions.RemoveEmptyEntries);
+            if (part == 2)
+            {
+                lines[0] = lines[0].Replace(" ", string.Empty);
+                lines[1] = lines[1].Replace(" ", string.Empty);
+            }
             var times = ConvertLineToIntArray(lines[0]);
             var distances = ConvertLineToIntArray(lines[1]);
-            int[] results = new int[times.Length];
+            long[] results = new long[times.Length];
             for (int i = 0; i < times.Length; i++)
             {
                 results[i] = CalculateNumberOfWinningOptions(times[i], distances[i]);
             }
 
-            int answer = 1;
+            long answer = 1;
             foreach (var item in results)
             {
                 answer *= item;
@@ -26,14 +31,14 @@
             Console.WriteLine($"Answer: {answer}");
         }
 
-        private static int[] ConvertLineToIntArray(string line)
+        private static long[] ConvertLineToIntArray(string line)
         {
-            return Array.ConvertAll(line.Split(":")[1].Split(" ", StringSplitOptions.RemoveEmptyEntries), int.Parse);
+            return Array.ConvertAll(line.Split(":")[1].Split(" ", StringSplitOptions.RemoveEmptyEntries), long.Parse);
         }
 
-        private static int CalculateNumberOfWinningOptions(int time, int distance)
+        private static long CalculateNumberOfWinningOptions(long time, long distance)
         {
-            int minVelocity = 0;
+            long minVelocity = 0;
             while (minVelocity * (time - minVelocity) <= distance)
             {
                 minVelocity++;
