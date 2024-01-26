@@ -12,14 +12,13 @@
 		<Content Include="Inputs\*">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-		<Folder Include="Tests\" />
 		<Content Include="Tests\*">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Inputs\Day_2.cs" />
+		<Compile Remove="Inputs\Day_2.cs" />
 	</ItemGroup>
 
 </Project>
