@@ -8,7 +8,26 @@
         private static readonly string endingNode = "ZZZ";
         private static int Part;
 
-        private record Node(string Key, string Left, string Right);
+        private class Node
+        {
+            public string Key { get; private set; }
+            public Node? Left { get; set; }
+            public Node? Right { get; set; }
+
+            public Node(string Key, Node? Left, Node? Right)
+            {
+                this.Key = Key;
+                this.Left = Left;
+                this.Right = Right;
+            }
+
+            public Node? MakeMove(char direction)
+            {
+                if (direction == 'L')
+                    return Left;
+                return Right;
+            }
+        }
 
         public static void Solve(int part = 1, bool isTest = false)
         {
@@ -18,7 +37,7 @@
 
             var instructions = lines[0];
             var nodes = LoadNodes(lines[1..]);
-            int steps = 0;
+            long steps;
             if (Part == 1)
             {
                 steps = CountPathSteps(nodes, instructions, startingNode);
@@ -38,12 +57,21 @@
             {
                 var parts = line.Split(" = ");
                 string key = parts[0];
+                dict.Add(key, new Node(key, null, null));
+            }
+
+            foreach (var line in lines)
+            {
+                var parts = line.Split(" = ");
+                var root = dict[parts[0]];
                 var nodesString = parts[1].Substring(1, parts[1].Length - 2);
                 var nodesPart = nodesString.Split(", ");
-                var left = nodesPart[0];
-                var right = nodesPart[1];
-                dict.Add(key, new Node(key, left, right));
+                var left = dict[nodesPart[0]];
+                var right = dict[nodesPart[1]];
+                root.Left = left;
+                root.Right = right;
             }
+
             return dict;
         }
 
@@ -51,64 +79,79 @@
         {
             string currentNodeKey = startingNodeKey;
             int steps = 0;
-            while (currentNodeKey != endingNode)
+            var node = nodes[currentNodeKey];
+            while (node!.Key != endingNode)
             {
-                var node = nodes[currentNodeKey];
-                int dir = instructions[steps % instructions.Length];
-                if (dir == 'L')
-                {
-                    currentNodeKey = node.Left;
-                }
-                else
-                {
-                    currentNodeKey = node.Right;
-                }
+                char dir = instructions[steps % instructions.Length];
+                node = node.MakeMove(dir);
                 steps++;
             }
             return steps;
         }
 
-        //todo: its too slow :((
-        private static int CountALlPathStepsConcurrently(Dictionary<string, Node> nodes, string instructions)
+        private static long CountALlPathStepsConcurrently(Dictionary<string, Node> nodes, string instructions)
         {
-            var currentNodesList = new List<string>();
+            var currentNodesList = new List<Node?>();
             foreach (var node in nodes)
             {
                 if (node.Key.EndsWith('A'))
                 {
-                    currentNodesList.Add(node.Key);
+                    currentNodesList.Add(node.Value);
                 }
             }
 
             int steps = 0;
 
             var currentNodes = currentNodesList.ToArray();
+            var stepsCount = new long[currentNodes.Length];
 
-            bool shouldStop = false;
-            while (!shouldStop)
+            int finished = 0;
+            while (finished < currentNodes.Length)
             {
-                shouldStop = true;
-                int dir = instructions[steps % instructions.Length];
+                char dir = instructions[steps % instructions.Length];
+                steps++;
                 for (int i = 0; i < currentNodes.Length; i++)
                 {
-                    var node = nodes[currentNodes[i]];
-                    if (dir == 'L')
+                    var node = currentNodes[i];
+                    if (node == null)
                     {
-                        currentNodes[i] = node.Left;
+                        continue;
+                    }
+                    node = node.MakeMove(dir);
+                    if (node!.Key.EndsWith('Z'))
+                    {
+                        stepsCount[i] = steps;
+                        currentNodes[i] = null;
+                        finished++;
                     }
                     else
                     {
-                        currentNodes[i] = node.Right;
-                    }
-                    if (!currentNodes[i].EndsWith('Z'))
-                    {
-                        shouldStop = false;
+                        currentNodes[i] = node;
                     }
                 }
-                steps++;
             }
 
-            return steps;
+
+            return LCM(stepsCount);
+        }
+
+        private static long GCD(long n1, long n2)
+        {
+            if (n2 == 0)
+            {
+                return n1;
+            }
+            else
+            {
+                return GCD(n2, n1 % n2);
+            }
+        }
+
+        private static long LCM(long[] numbers)
+        {
+            return numbers.Aggregate((S, val) => S * val / GCD(S, val));
         }
     }
 }
+
+
