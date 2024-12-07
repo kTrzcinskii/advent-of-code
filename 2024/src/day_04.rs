@@ -5,7 +5,8 @@ pub fn solve() {
     let letters = parse_to_2d(&contents);
     let first_part_result = first_part(&letters);
     println!("First part result: {}", first_part_result);
-    // TODO: second part
+    let second_part_result = second_part(&letters);
+    println!("Second part result: {}", second_part_result);
 }
 
 fn load_from_file() -> String {
@@ -155,5 +156,42 @@ fn check_right_down(
         letters[row + 1][col + 1] == 'M'
             && letters[row + 2][col + 2] == 'A'
             && letters[row + 3][col + 3] == 'S'
+    }
+}
+
+fn second_part(letters: &[Vec<char>]) -> usize {
+    let rows = letters.len();
+    let cols = letters[0].len();
+
+    let mut a_positions = vec![];
+
+    #[allow(clippy::needless_range_loop)]
+    for i in 0..rows {
+        for j in 0..cols {
+            if letters[i][j] == 'A' {
+                a_positions.push((i, j));
+            }
+        }
+    }
+
+    a_positions.iter().fold(0, |acc, &pos| {
+        if check_x_mas(letters, pos, rows, cols) {
+            acc + 1
+        } else {
+            acc
+        }
+    })
+}
+
+fn check_x_mas(letters: &[Vec<char>], pos: (usize, usize), max_row: usize, max_col: usize) -> bool {
+    let (row, col) = pos;
+    if row < 1 || row + 1 >= max_row || col < 1 || col + 1 >= max_col {
+        false
+    } else {
+        let from_left = (letters[row - 1][col - 1] == 'M' && letters[row + 1][col + 1] == 'S')
+            || (letters[row - 1][col - 1] == 'S' && letters[row + 1][col + 1] == 'M');
+        let from_right = (letters[row - 1][col + 1] == 'M' && letters[row + 1][col - 1] == 'S')
+            || (letters[row - 1][col + 1] == 'S' && letters[row + 1][col - 1] == 'M');
+        from_left && from_right
     }
 }
