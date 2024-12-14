@@ -78,7 +78,22 @@ impl TrailDirectedGraph {
     }
 
     fn how_many_distinct_paths(&self, from: (usize, usize), value: u8) -> usize {
-        todo!()
+        let mut counter = 0;
+        let mut stack: Vec<(usize, usize)> = vec![from];
+
+        while let Some(node) = stack.pop() {
+            let neighbours = self.edges.get(&node);
+            if let Some(neighbours) = neighbours {
+                for neigh in neighbours {
+                    if self.nodes[neigh.0][neigh.1] == value {
+                        counter += 1;
+                    } else {
+                        stack.push(*neigh);
+                    }
+                }
+            }
+        }
+        counter
     }
 }
 
