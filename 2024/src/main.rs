@@ -1,5 +1,5 @@
-use solutions_2024::day_12;
+use solutions_2024::day_13;
 
 fn main() {
-    day_12::solve();
+    day_13::solve();
 }
